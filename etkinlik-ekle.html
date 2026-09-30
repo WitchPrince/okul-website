@@ -3,47 +3,55 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Etkinlik Ekle</title>
+    <title>Etkinlik Ekle | Kampüs Etkinlikleri</title>
+    <link rel="stylesheet" href="css/numaran.css">
 </head>
 <body>
-    <header>
-        <h1>Etkinlik Ekle</h1>
-        <nav>
-            <a href="index.html">Ana Sayfa</a>
-            <a href="etkinlik-ekle.html">Ekle</a>
-            <a href="etkinlik-guncelle.html">Güncelle</a>
-        </nav>
+    <header class="site-header">
+        <div class="header-inner">
+            <h1>Etkinlik Ekle</h1>
+            <nav aria-label="Ana menü">
+                <a href="index.html">Ana Sayfa</a>
+                <a href="etkinlikler.html">Etkinlikler</a>
+                <a href="etkinlik-ekle.html">Ekle</a>
+                <a href="etkinlik-guncelle.html">Güncelle</a>
+            </nav>
+        </div>
     </header>
-
     <main>
-        <form action="#" method="post">
-            <p>
-                <label for="etkinlik-adi">Etkinlik Adı</label><br>
-                <input type="text" id="etkinlik-adi" name="etkinlik_adi" required>
-            </p>
+        
+<form class="form" action="#" method="post">
+    <div class="form-field">
+        <label for="etkinlik-adi">Etkinlik adı</label>
+        <input type="text" id="etkinlik-adi" name="etkinlik_adi" required>
+    </div>
 
-            <p>
-                <label for="kategori">Kategori</label><br>
-                <select id="kategori" name="kategori" required>
-                    <option value="seminer">Seminer</option>
-                    <option value="atolye">Atölye</option>
-                    <option value="kariyer">Kariyer</option>
-                    <option value="diger">Diğer</option>
-                </select>
-            </p>
+    <div class="form-field">
+        <label for="kategori">Kategori</label>
+        <select id="kategori" name="kategori" required>
+            <option value="" selected>Seçiniz</option>
+            <option value="seminer">Seminer</option>
+            <option value="atolye">Atölye</option>
+            <option value="soylesi">Söyleşi</option>
+        </select>
+    </div>
 
-            <p>
-                <label for="tarih">Tarih</label><br>
-                <input type="date" id="tarih" name="tarih" required>
-            </p>
+    <div class="form-field">
+        <label for="tarih">Tarih</label>
+        <input type="date" id="tarih" name="tarih" required>
+    </div>
 
-            <p>
-                <label for="aciklama">Açıklama</label><br>
-                <textarea id="aciklama" name="aciklama" rows="5" cols="40" required></textarea>
-            </p>
+    <div class="form-field">
+        <label for="aciklama">Açıklama</label>
+        <textarea id="aciklama" name="aciklama" required></textarea>
+    </div>
 
-            <button type="submit">Kaydet</button>
-        </form>
+    <button type="submit">Kaydet</button>
+</form>
+
     </main>
+    <footer class="site-footer">
+        <p>Ad Soyad · 2416501044 · 2026</p>
+    </footer>
 </body>
 </html>
