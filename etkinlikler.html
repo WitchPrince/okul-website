@@ -1,52 +1,47 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Etkinlikler | Kampüs Etkinlikleri</title>
-    <link rel="stylesheet" href="css/2416501044.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tüm Etkinlikler</title>
+  <link rel="stylesheet" href="css/2416501044.css">
+  <script type="module" src="js/event-list.js"></script>
 </head>
 <body>
-    <header class="site-header">
-        <div class="header-inner">
-            <h1>Tüm Etkinlikler</h1>
-            <nav aria-label="Ana menü">
-                <a href="index.html">Ana Sayfa</a>
-                <a href="etkinlikler.html">Etkinlikler</a>
-                <a href="etkinlik-ekle.html">Ekle</a>
-                <a href="etkinlik-guncelle.html">Güncelle</a>
-            </nav>
-        </div>
-    </header>
-    <main>
-        
-<section aria-labelledby="tum-etkinlikler">
-    <h2 id="tum-etkinlikler">Tüm Etkinlikler</h2>
-    <div class="event-grid">
-        <article class="event-card">
-    <h3>Kariyer Günleri</h3>
-    <p class="event-meta">Seminer · 12 Ekim</p>
-    <p>A Blok</p>
-    <a class="event-link" href="etkinlik-detay.html">Detay →</a>
-</article>
-<article class="event-card">
-    <h3>Robotik Atölyesi</h3>
-    <p class="event-meta">Atölye · 20 Ekim</p>
-    <p>Lab 2</p>
-    <a class="event-link" href="etkinlik-detay.html">Detay →</a>
-</article>
-<article class="event-card">
-    <h3>Siber Güvenlik</h3>
-    <p class="event-meta">Söyleşi · 27 Ekim</p>
-    <p>B Blok</p>
-    <a class="event-link" href="etkinlik-detay.html">Detay →</a>
-</article>
-    </div>
-</section>
+  <header>
+    <h1>Tüm Etkinlikler</h1>
+    <nav aria-label="Ana menü">
+      <a href="index.html">Ana Sayfa</a>
+      <a href="etkinlikler.html">Etkinlikler</a>
+      <a href="etkinlik-ekle.html">Ekle</a>
+    </nav>
+  </header>
 
-    </main>
-    <footer class="site-footer">
-        <p>Işıkhan IŞIK · 2416501044 · 2026</p>
-    </footer>
+  <main>
+    <section aria-labelledby="filtre-baslik">
+      <h2 id="filtre-baslik">Etkinlikleri ara ve filtrele</h2>
+
+      <form id="filtre-formu" class="filtre">
+        <div>
+          <label for="arama">Etkinlik ara</label>
+          <input type="search" id="arama" placeholder="atölye, kariyer...">
+        </div>
+
+        <div>
+          <label for="kategori-filtre">Kategori</label>
+          <select id="kategori-filtre">
+            <option value="">Tümü</option>
+          </select>
+        </div>
+      </form>
+
+      <p id="sonuc" aria-live="polite">6 etkinlik listeleniyor.</p>
+      <div id="etkinlik-listesi" class="etkinlik-listesi"></div>
+    </section>
+  </main>
+
+  <footer>
+    <p>Işıkhan IŞIK · 2026</p>
+  </footer>
 </body>
 </html>
