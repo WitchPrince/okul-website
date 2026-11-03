@@ -1,9 +1,13 @@
-export function formatDate(date: string): string {
-  const [day, month, year] = date.split("-");
-  return `${day}.${month}.${year}`;
-}
-
 export function parseDate(date: string): string {
-  const [day, month, year] = date.split("-");
-  return `${year}-${month}-${day}`;
+  if (date.includes("-")) {
+    const parts = date.split("-");
+    if (parts[0].length === 4) return date;
+    const [day, month, year] = parts;
+    return `${year}-${month}-${day}`;
+  }
+  return date;
+}
+export function formatDate(date: string): string {
+  const [year, month, day] = parseDate(date).split("-");
+  return `${day}.${month}.${year}`;
 }
