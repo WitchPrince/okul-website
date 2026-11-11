@@ -18,6 +18,8 @@ npm run dev
 
 `dev` komutu dosyalar değişince sunucuyu yeniden başlatır. İzleme olmadan çalıştırmak için `npm start` kullanılabilir. Komutları `backend/` içinde çalıştırın.
 
+İlk kontrol için `http://localhost:3000/health`, liste için `http://localhost:3000/events` adresini açın. Backend bir web sayfası değil, JSON API'dir; `/` adresinde sayfa tanımlı olmadığı için 404 yanıtı döner. Görsel siteyi açmak için frontend'i ayrıca başlatıp Vite'ın gösterdiği adresi kullanın (varsayılan `http://localhost:5173`).
+
 ## Ortam değişkeni
 
 `.env.example` dosyasında gerekli ayarın örneği bulunur:
@@ -124,4 +126,4 @@ Beşinci istek bellekteki listeyi değiştirdiğinden koleksiyonu tekrar çalı�
 
 ## Teslim notu
 
-Frontend ve Vercel ayarları değişmedi; backend bu sprintte canlıya alınmıyor. Teslimde aşama aşama atılmış en az beş commit ve `sprint-07` etiketi bulunmalı. Commit, etiket ve GitHub'a gönderme işlemleri bu test klasöründe yapılmadı; ana depoda ayrıca tamamlanmalıdır.
+Frontend ve Vercel ayarları değişmedi; backend bu sprintte canlıya alınmıyor. Teslimde aşama aşama atılmış en az beş commit ve `sprint-07` etiketi bulunmalı. Commit ve etiketler GitHub'a gönderilmeli, repo bağlantısı ders sitesine eklenmelidir.

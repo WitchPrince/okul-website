@@ -12,11 +12,15 @@ Sprint 7'de mevcut frontend korunarak yanına Node.js + Express ile ayrı bir `b
 
 ## Kurulum ve çalıştırma
 
+### Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
+
+Terminalde gösterilen adresi açın; varsayılan adres `http://localhost:5173` olur.
 
 Üretim derlemesi ve yerel önizleme:
 
@@ -38,9 +42,11 @@ npm run dev
 
 Node.js 22 veya üstü kullanılmalıdır. API `http://localhost:3000` adresinde çalışır. `/health` sunucu durumunu, zamanı ve öğrenci numarasını döndürür. Frontend ve Vercel ayarları değişmedi; backend bu sprintte yalnızca yerelde çalıştırılır.
 
+Tarayıcıda `http://localhost:3000/health` ve `http://localhost:3000/events` adresleri kontrol edilebilir. Backend'de ana sayfa tanımlı değildir; `http://localhost:3000/` adresinin JSON 404 yanıtı vermesi normaldir.
+
 API sözleşmesi, ortam ayarları ve test adımları: [backend/README.md](backend/README.md). Altı isteklik Postman koleksiyonu: [backend/requests/kampus-api.json](backend/requests/kampus-api.json).
 
-## Route listesi (10 adres)
+## Frontend route listesi (10 adres)
 
 | Adres | Sayfa |
 |---|---|
@@ -147,6 +153,6 @@ Frontend verisi kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenile
 - GET liste ve detay istekleri 200, bulunamayan etkinlik 404 döndürüyor.
 - POST başarılıysa 201, zorunlu alan eksikse 400 döndürüyor.
 - REST sözleşmesi backend README'sinde, altı istek Postman koleksiyonunda bulunuyor.
-- Ana depoda en az beş aşamalı commit oluşturulmalı; `sprint-07` etiketi ve GitHub'a gönderim tamamlanmalı. Bu test klasöründe Git işlemi yapılmadı.
+- Teslimden önce en az beş aşamalı commit, `sprint-07` etiketi ve GitHub'a gönderim tamamlanmalı; repo bağlantısı ders sitesine eklenmeli.
 
 > Not: Frontend React state, backend ise ayrı bir bellek içi dizi kullanır. Henüz veritabanı veya frontend–API bağlantısı yoktur; kimlik doğrulama ve e-posta işlemleri demo olarak kalır.
