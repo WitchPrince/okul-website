@@ -1,0 +1,163 @@
+{
+  "info": {
+    "name": "Kampüs API",
+    "description": "Işıkhan IŞIK - 2416501044. Sprint 7 için altı istek. Sunucuyu yeni başlatıp istekleri sırayla çalıştırın; adres http://localhost:3000 olmalıdır.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1 Health",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Sunucu ayakta ve öğrenci numarası doğru', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const body = pm.response.json();",
+              "  pm.expect(body.status).to.eql('ok');",
+              "  pm.expect(body.student).to.eql('2416501044');",
+              "  pm.expect(new Date(body.time).toISOString()).to.eql(body.time);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2 Etkinlik listesi",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/events"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Başlangıçta altı etkinlik var', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const events = pm.response.json();",
+              "  pm.expect(events).to.be.an('array').with.lengthOf(6);",
+              "  pm.expect(events.map(function (event) { return event.id; })).to.eql(['event-1', 'event-2', 'event-3', 'event-4', 'event-5', 'event-6']);",
+              "  events.forEach(function (event) { pm.expect(event).not.to.have.property('image'); });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3 Tek etkinlik",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/events/event-2"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('event-2 kaydı geliyor', function () {",
+              "  pm.response.to.have.status(200);",
+              "  const event = pm.response.json();",
+              "  pm.expect(event.id).to.eql('event-2');",
+              "  pm.expect(event.title).to.eql('Sensörlerle Akıllı Saksı Yapımı');",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4 Olmayan etkinlik (404)",
+      "request": {
+        "method": "GET",
+        "url": "http://localhost:3000/events/yok"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Olmayan etkinlik için 404 dönüyor', function () {",
+              "  pm.response.to.have.status(404);",
+              "  pm.expect(pm.response.json()).to.eql({ error: { message: 'Event not found' } });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5 Etkinlik oluştur (201)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Kampüs İçin Mini API Atölyesi\",\n  \"category\": \"Atölye\",\n  \"date\": \"2026-12-08\",\n  \"time\": \"13:00\",\n  \"location\": \"Yazılım Kulübü Odası\",\n  \"description\": \"Birlikte küçük bir etkinlik API'si hazırlayacağız.\",\n  \"capacity\": 24\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "http://localhost:3000/events"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Yeni etkinlik 201 ve yeni kimlikle dönüyor', function () {",
+              "  pm.response.to.have.status(201);",
+              "  const event = pm.response.json();",
+              "  const sent = JSON.parse(pm.request.body.raw);",
+              "  pm.expect(event.id).to.match(/^event-\\d+$/);",
+              "  pm.expect(event.id).not.to.be.oneOf(['event-1', 'event-2', 'event-3', 'event-4', 'event-5', 'event-6']);",
+              "  Object.keys(sent).forEach(function (key) { pm.expect(event[key]).to.eql(sent[key]); });",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6 Eksik veri (400)",
+      "request": {
+        "method": "POST",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"title\": \"Eksik Bilgili Etkinlik\"\n}",
+          "options": { "raw": { "language": "json" } }
+        },
+        "url": "http://localhost:3000/events"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Eksik alanlar için 400 dönüyor', function () {",
+              "  pm.response.to.have.status(400);",
+              "  pm.expect(pm.response.json()).to.eql({ error: { message: 'title, category and date are required' } });",
+              "});"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}

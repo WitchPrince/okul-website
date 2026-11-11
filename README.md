@@ -1,4 +1,4 @@
-# Kampüs Etkinlikleri — Sprint 6 + Vize Teslimi
+# Kampüs Etkinlikleri — Sprint 7
 
 **Öğrenci:** Işıkhan IŞIK  
 **Öğrenci numarası:** 2416501044  
@@ -7,6 +7,8 @@
 ## Proje
 
 Kampüs etkinliklerini listeleyen, arayan, detaylarını gösteren ve yönetim panelinden ekleme/güncelleme/silme işlemlerini yapan React + TypeScript tek sayfalı uygulaması.
+
+Sprint 7'de mevcut frontend korunarak yanına Node.js + Express ile ayrı bir `backend/` uygulaması eklendi. Backend, etkinlik listeleme, detay ve oluşturma işlemlerini JSON olarak sunar. Frontend henüz API'ye bağlı değildir; kendi Context verisini kullanmaya devam eder.
 
 ## Kurulum ve çalıştırma
 
@@ -22,6 +24,21 @@ npm run dev
 npm run build
 npm run preview
 ```
+
+### Backend
+
+Repo kökünden ayrı bir terminalde:
+
+```bash
+cd backend
+npm install
+cp .env.example .env
+npm run dev
+```
+
+Node.js 22 veya üstü kullanılmalıdır. API `http://localhost:3000` adresinde çalışır. `/health` sunucu durumunu, zamanı ve öğrenci numarasını döndürür. Frontend ve Vercel ayarları değişmedi; backend bu sprintte yalnızca yerelde çalıştırılır.
+
+API sözleşmesi, ortam ayarları ve test adımları: [backend/README.md](backend/README.md). Altı isteklik Postman koleksiyonu: [backend/requests/kampus-api.json](backend/requests/kampus-api.json).
 
 ## Route listesi (10 adres)
 
@@ -60,11 +77,29 @@ frontend/src/
   main.tsx
 ```
 
+Backend dosyaları:
+
+```text
+backend/
+  src/
+    app.js
+    server.js
+    routes/event-routes.js
+    controllers/event-controller.js
+    data/events.js
+  requests/kampus-api.json
+  .env.example
+  .gitignore
+  package.json
+  package-lock.json
+  README.md
+```
+
 ## State ve Context
 
 `EventsProvider` tüm route'ları sarar. `useEvents()` hook'u üzerinden `events`, `addEvent`, `updateEvent` ve `deleteEvent` fonksiyonları kullanılır. Ekleme yeni dizi oluşturur, güncelleme `map()` ile yalnızca eşleşen kaydı değiştirir, silme `filter()` ile eşleşen kaydı çıkarır. React state değişikliği ekranı yeniden render eder; `push()`/`splice()` ile mevcut diziyi doğrudan değiştirme yapılmaz.
 
-Bu teslimde veri kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenilendiğinde başlangıçtaki örnek veriler yüklenir. Context, uygulama açıkken route'lar arasında ortak veriyi taşır.
+Frontend verisi kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenilendiğinde başlangıçtaki örnek veriler yüklenir. Context, uygulama açıkken route'lar arasında ortak veriyi taşır. Backend'in ayrı bir bellek içi dizisi vardır; POST ile eklenen kayıtlar sunucu yeniden başlatıldığında kaybolur.
 
 ## Formlar ve doğrulama
 
@@ -72,7 +107,7 @@ Bu teslimde veri kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenil
 - `validateEvent()` alan kurallarını kontrol eder: etkinlik adı en az 3 karakter, kategori seçilmiş, tarih/saat/yer boş değil, kontenjan 1–1000 arasında tam sayı, açıklama en az 10 karakter olmalıdır.
 - Gönderimde `preventDefault()` çağrılır, doğrulama hataları state'e yazılır ve alanların altında gösterilir. Hata yoksa `onSubmit(data)` çalışır.
 - Ekleme ve güncelleme aynı `EventForm` bileşenini kullanır; başlangıç verisi farklıdır. Güncelleme route'u URL'deki etkinlik kimliğini bulur.
-- Giriş, kayıt ve şifremi unuttum sayfaları controlled input ve hata/başarı mesajları içerir. Bunlar eğitim amaçlı ön yüz demolarıdır; gerçek kimlik doğrulama, e-posta gönderimi veya backend bulunmaz.
+- Giriş, kayıt ve şifremi unuttum sayfaları controlled input ve hata/başarı mesajları içerir. Bunlar eğitim amaçlı ön yüz demolarıdır; gerçek kimlik doğrulama veya e-posta gönderimi yoktur ve bu formlar backend'e bağlı değildir.
 
 ## Yönetim ve mobil görünüm
 
@@ -86,7 +121,7 @@ Bu teslimde veri kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenil
 - Output Directory: `dist`
 - `frontend/vercel.json`, `/events/...` ve diğer alt adreslerin doğrudan açılabilmesi için `/index.html` rewrite kuralını içerir.
 
-## Teslim öncesi kontrol listesi
+## Frontend kontrol listesi (Sprint 6)
 
 1. Tüm linkler çalışıyor.
 2. 10 route tanımlı.
@@ -102,4 +137,16 @@ Bu teslimde veri kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenil
 12. CSS bozulması olmamalı.
 13. Etkinlik ekleme, giriş, kayıt ve şifremi unuttum formları doğrulanmalı.
 
-> Not: Bu çalışma istemci tarafı bir ders projesidir. Veriler backend/veritabanı olmadan React state içinde tutulur; kimlik doğrulama ve e-posta işlemleri demo olarak gösterilir.
+## Sprint 7 teslim kontrolü
+
+- Backend ayrı `backend/` klasöründe; route, controller ve veri dosyaları ayrıldı.
+- PORT `.env` üzerinden okunuyor ve `.env.example` mevcut.
+- `.env` ve `node_modules/` Git dışında tutulmalı.
+- `/health` yanıtında öğrenci numarası `2416501044`.
+- Backend'de özgün başlık, yer ve açıklamaları olan altı etkinlik var; kimlikler `event-1`–`event-6`.
+- GET liste ve detay istekleri 200, bulunamayan etkinlik 404 döndürüyor.
+- POST başarılıysa 201, zorunlu alan eksikse 400 döndürüyor.
+- REST sözleşmesi backend README'sinde, altı istek Postman koleksiyonunda bulunuyor.
+- Ana depoda en az beş aşamalı commit oluşturulmalı; `sprint-07` etiketi ve GitHub'a gönderim tamamlanmalı. Bu test klasöründe Git işlemi yapılmadı.
+
+> Not: Frontend React state, backend ise ayrı bir bellek içi dizi kullanır. Henüz veritabanı veya frontend–API bağlantısı yoktur; kimlik doğrulama ve e-posta işlemleri demo olarak kalır.
