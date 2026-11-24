@@ -1,9 +1,12 @@
 {
   "info": {
     "name": "Kampüs API",
-    "description": "Işıkhan IŞIK - 2416501044. Sprint 7 için altı istek. Sunucuyu yeni başlatıp istekleri sırayla çalıştırın; adres http://localhost:3000 olmalıdır.",
+    "description": "Işıkhan IŞIK - 2416501044. Sprint 8 için altı istek. Test veritabanında npm run seed çalıştırın, ardından sunucuyu başlatıp istekleri sırayla çalıştırın. Seed mevcut etkinlikleri siler.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
+  "variable": [
+    { "key": "eventId", "value": "" }
+  ],
   "item": [
     {
       "name": "1 Health",
@@ -45,7 +48,12 @@
               "  pm.response.to.have.status(200);",
               "  const events = pm.response.json();",
               "  pm.expect(events).to.be.an('array').with.lengthOf(6);",
-              "  pm.expect(events.map(function (event) { return event.id; })).to.eql(['event-1', 'event-2', 'event-3', 'event-4', 'event-5', 'event-6']);",
+               "  events.forEach(function (event) {",
+               "    pm.expect(event._id).to.match(/^[a-f0-9]{24}$/);",
+               "    pm.expect(new Date(event.createdAt).toISOString()).to.eql(event.createdAt);",
+               "    pm.expect(new Date(event.updatedAt).toISOString()).to.eql(event.updatedAt);",
+               "  });",
+               "  pm.collectionVariables.set('eventId', events[0]._id);",
               "  events.forEach(function (event) { pm.expect(event).not.to.have.property('image'); });",
               "});"
             ]
@@ -57,7 +65,7 @@
       "name": "3 Tek etkinlik",
       "request": {
         "method": "GET",
-        "url": "http://localhost:3000/events/event-2"
+        "url": "http://localhost:3000/events/{{eventId}}"
       },
       "event": [
         {
@@ -65,11 +73,11 @@
           "script": {
             "type": "text/javascript",
             "exec": [
-              "pm.test('event-2 kaydı geliyor', function () {",
+               "pm.test('Listedeki kayıt gerçek _id ile geliyor', function () {",
               "  pm.response.to.have.status(200);",
               "  const event = pm.response.json();",
-              "  pm.expect(event.id).to.eql('event-2');",
-              "  pm.expect(event.title).to.eql('Sensörlerle Akıllı Saksı Yapımı');",
+               "  pm.expect(event._id).to.eql(pm.collectionVariables.get('eventId'));",
+               "  pm.expect(event.title).to.be.a('string');",
               "});"
             ]
           }
@@ -121,8 +129,11 @@
               "  pm.response.to.have.status(201);",
               "  const event = pm.response.json();",
               "  const sent = JSON.parse(pm.request.body.raw);",
-              "  pm.expect(event.id).to.match(/^event-\\d+$/);",
-              "  pm.expect(event.id).not.to.be.oneOf(['event-1', 'event-2', 'event-3', 'event-4', 'event-5', 'event-6']);",
+               "  pm.expect(event._id).to.match(/^[a-f0-9]{24}$/);",
+               "  pm.expect(event._id).not.to.eql(pm.collectionVariables.get('eventId'));",
+               "  pm.expect(new Date(event.createdAt).toISOString()).to.eql(event.createdAt);",
+               "  pm.expect(new Date(event.updatedAt).toISOString()).to.eql(event.updatedAt);",
+               "  pm.collectionVariables.set('createdEventId', event._id);",
               "  Object.keys(sent).forEach(function (key) { pm.expect(event[key]).to.eql(sent[key]); });",
               "});"
             ]
@@ -152,7 +163,9 @@
             "exec": [
               "pm.test('Eksik alanlar için 400 dönüyor', function () {",
               "  pm.response.to.have.status(400);",
-              "  pm.expect(pm.response.json()).to.eql({ error: { message: 'title, category and date are required' } });",
+               "  const message = pm.response.json().error.message;",
+               "  pm.expect(message).to.include('date');",
+               "  pm.expect(message).to.include('category');",
               "});"
             ]
           }

@@ -1,4 +1,4 @@
-# Kampüs Etkinlikleri — Sprint 7
+# Kampüs Etkinlikleri — Sprint 8
 
 **Öğrenci:** Işıkhan IŞIK  
 **Öğrenci numarası:** 2416501044  
@@ -8,7 +8,7 @@
 
 Kampüs etkinliklerini listeleyen, arayan, detaylarını gösteren ve yönetim panelinden ekleme/güncelleme/silme işlemlerini yapan React + TypeScript tek sayfalı uygulaması.
 
-Sprint 7'de mevcut frontend korunarak yanına Node.js + Express ile ayrı bir `backend/` uygulaması eklendi. Backend, etkinlik listeleme, detay ve oluşturma işlemlerini JSON olarak sunar. Frontend henüz API'ye bağlı değildir; kendi Context verisini kullanmaya devam eder.
+Sprint 7'de mevcut frontend korunarak yanına Node.js + Express ile ayrı bir `backend/` uygulaması eklendi. Sprint 8'de backend verileri MongoDB ve Mongoose ile kalıcı hale getirildi. Backend, etkinlik listeleme, detay ve oluşturma işlemlerini JSON olarak sunar. Frontend henüz API'ye bağlı değildir; kendi Context verisini kullanmaya devam eder.
 
 ## Kurulum ve çalıştırma
 
@@ -37,10 +37,11 @@ Repo kökünden ayrı bir terminalde:
 cd backend
 npm install
 cp .env.example .env
+npm run seed
 npm run dev
 ```
 
-Node.js 22 veya üstü kullanılmalıdır. API `http://localhost:3000` adresinde çalışır. `/health` sunucu durumunu, zamanı ve öğrenci numarasını döndürür. Frontend ve Vercel ayarları değişmedi; backend bu sprintte yalnızca yerelde çalıştırılır.
+Node.js 22 veya üstü kullanılmalıdır. Komutlardan önce MongoDB hazır olmalı ve `backend/.env` içindeki `MONGODB_URI` ayarlanmalıdır. `.env` zaten varsa üzerine kopyalamayın; mevcut dosyaya değişkeni ekleyin. `npm run seed` bağlı veritabanındaki tüm etkinlikleri silip altı örnek kayıt ekler; yalnızca geliştirme/test veritabanında kullanın. API `http://localhost:3000` adresinde çalışır. `/health` sunucu durumunu, zamanı ve öğrenci numarasını döndürür. Frontend ve Vercel ayarları değişmedi; backend bu sprintte yalnızca yerelde çalıştırılır.
 
 Tarayıcıda `http://localhost:3000/health` ve `http://localhost:3000/events` adresleri kontrol edilebilir. Backend'de ana sayfa tanımlı değildir; `http://localhost:3000/` adresinin JSON 404 yanıtı vermesi normaldir.
 
@@ -90,9 +91,12 @@ backend/
   src/
     app.js
     server.js
+    seed.js
+    config/database.js
+    models/event-model.js
     routes/event-routes.js
     controllers/event-controller.js
-    data/events.js
+    data/seed-events.js
   requests/kampus-api.json
   .env.example
   .gitignore
@@ -105,7 +109,7 @@ backend/
 
 `EventsProvider` tüm route'ları sarar. `useEvents()` hook'u üzerinden `events`, `addEvent`, `updateEvent` ve `deleteEvent` fonksiyonları kullanılır. Ekleme yeni dizi oluşturur, güncelleme `map()` ile yalnızca eşleşen kaydı değiştirir, silme `filter()` ile eşleşen kaydı çıkarır. React state değişikliği ekranı yeniden render eder; `push()`/`splice()` ile mevcut diziyi doğrudan değiştirme yapılmaz.
 
-Frontend verisi kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenilendiğinde başlangıçtaki örnek veriler yüklenir. Context, uygulama açıkken route'lar arasında ortak veriyi taşır. Backend'in ayrı bir bellek içi dizisi vardır; POST ile eklenen kayıtlar sunucu yeniden başlatıldığında kaybolur.
+Frontend verisi kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenilendiğinde başlangıçtaki örnek veriler yüklenir. Context, uygulama açıkken route'lar arasında ortak veriyi taşır. Backend ayrı MongoDB veritabanını kullanır; POST ile eklenen kayıtlar sunucu yeniden başlatıldığında korunur.
 
 ## Formlar ve doğrulama
 
@@ -143,16 +147,18 @@ Frontend verisi kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenile
 12. CSS bozulması olmamalı.
 13. Etkinlik ekleme, giriş, kayıt ve şifremi unuttum formları doğrulanmalı.
 
-## Sprint 7 teslim kontrolü
+## Sprint 8 teslim kontrolü
 
 - Backend ayrı `backend/` klasöründe; route, controller ve veri dosyaları ayrıldı.
-- PORT `.env` üzerinden okunuyor ve `.env.example` mevcut.
+- PORT ve MONGODB_URI ortam değişkenlerinden okunuyor ve `.env.example` mevcut.
 - `.env` ve `node_modules/` Git dışında tutulmalı.
 - `/health` yanıtında öğrenci numarası `2416501044`.
-- Backend'de özgün başlık, yer ve açıklamaları olan altı etkinlik var; kimlikler `event-1`–`event-6`.
+- Seed verisinde özgün başlık, yer ve açıklamaları olan altı etkinlik var; MongoDB `_id` kimliklerini üretir.
 - GET liste ve detay istekleri 200, bulunamayan etkinlik 404 döndürüyor.
 - POST başarılıysa 201, zorunlu alan eksikse 400 döndürüyor.
 - REST sözleşmesi backend README'sinde, altı istek Postman koleksiyonunda bulunuyor.
-- Teslimden önce en az beş aşamalı commit, `sprint-07` etiketi ve GitHub'a gönderim tamamlanmalı; repo bağlantısı ders sitesine eklenmeli.
+- Seed iki kez çalıştırıldığında da altı kayıt kalmalı; POST kaydı sunucu yeniden başlatıldığında korunmalı.
+- Git geçmişinde gerçek Atlas bağlantı adresi veya şifre bulunmamalı.
+- Teslimden önce değişiklikler aşamalı commit'lerle GitHub'a gönderilmeli; repo bağlantısı ders sitesine eklenmeli.
 
-> Not: Frontend React state, backend ise ayrı bir bellek içi dizi kullanır. Henüz veritabanı veya frontend–API bağlantısı yoktur; kimlik doğrulama ve e-posta işlemleri demo olarak kalır.
+> Not: Frontend React state, backend ise MongoDB kullanır. Henüz frontend–API bağlantısı yoktur; kimlik doğrulama ve e-posta işlemleri demo olarak kalır.

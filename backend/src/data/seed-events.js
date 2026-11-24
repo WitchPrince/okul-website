@@ -1,6 +1,5 @@
-export const events = [
+export const seedEvents = [
   {
-    id: "event-1",
     title: "Açık Kaynak Projelere İlk Katkı",
     category: "Seminer",
     date: "2026-10-12",
@@ -10,7 +9,6 @@ export const events = [
     capacity: 120,
   },
   {
-    id: "event-2",
     title: "Sensörlerle Akıllı Saksı Yapımı",
     category: "Atölye",
     date: "2026-10-15",
@@ -20,7 +18,6 @@ export const events = [
     capacity: 30,
   },
   {
-    id: "event-3",
     title: "Kampüste Dijital Mahremiyet",
     category: "Söyleşi",
     date: "2026-10-20",
@@ -30,7 +27,6 @@ export const events = [
     capacity: 150,
   },
   {
-    id: "event-4",
     title: "Oyunlarda Yol Bulma Algoritmaları",
     category: "Seminer",
     date: "2026-10-22",
@@ -40,7 +36,6 @@ export const events = [
     capacity: 200,
   },
   {
-    id: "event-5",
     title: "Tarayıcıda Kendi Not Defterini Yaz",
     category: "Atölye",
     date: "2026-10-27",
@@ -50,7 +45,6 @@ export const events = [
     capacity: 25,
   },
   {
-    id: "event-6",
     title: "İlk Stajın Ardından: Neler Öğrendik?",
     category: "Söyleşi",
     date: "2026-10-30",

@@ -1,44 +1,50 @@
-import { events } from "../data/events.js";
+import mongoose from "mongoose";
+import { Event } from "../models/event-model.js";
 
-export function getEvents(req, res) {
-  const { category } = req.query;
-  const list = category
-    ? events.filter((event) => event.category === category)
-    : events;
-
-  res.json(list);
-}
-
-export function getEventById(req, res) {
-  const event = events.find((event) => event.id === req.params.id);
-
-  if (!event) {
-    return res.status(404).json({ error: { message: "Event not found" } });
+export async function getEvents(req, res, next) {
+  try {
+    const { category } = req.query;
+    if (category !== undefined && typeof category !== "string") {
+      return res.status(400).json({ error: { message: "category must be a string" } });
+    }
+    const filter = category ? { category } : {};
+    const events = await Event.find(filter).sort({ date: 1 });
+    res.json(events);
+  } catch (err) {
+    next(err);
   }
-
-  res.json(event);
 }
 
-export function createEvent(req, res) {
-  const { title, category, capacity, date, time, location, description } = req.body ?? {};
+export async function getEventById(req, res, next) {
+  try {
+    if (!mongoose.isValidObjectId(req.params.id)) {
+      return res.status(404).json({ error: { message: "Event not found" } });
+    }
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ error: { message: "Event not found" } });
+    }
+    res.json(event);
+  } catch (err) {
+    next(err);
+  }
+}
 
-  if ([title, category, date].some((field) => typeof field !== "string" || !field.trim())) {
-    return res.status(400).json({
-      error: { message: "title, category and date are required" },
+export async function createEvent(req, res, next) {
+  try {
+    const body = req.body ?? {};
+    if (typeof body !== "object" || Array.isArray(body)) {
+      return res.status(400).json({ error: { message: "Event body must be an object" } });
+    }
+    const { title, category, capacity, date, time, location, description } = body;
+    const event = await Event.create({
+      title, category, capacity, date, time, location, description,
     });
+    res.status(201).json(event);
+  } catch (err) {
+    if (err.name === "ValidationError") {
+      return res.status(400).json({ error: { message: err.message } });
+    }
+    next(err);
   }
-
-  const newEvent = {
-    id: `event-${Date.now()}`,
-    title,
-    category,
-    date,
-    capacity: Number(capacity) || 0,
-    time: time ?? "",
-    location: location ?? "",
-    description: description ?? "",
-  };
-
-  events.push(newEvent);
-  res.status(201).json(newEvent);
 }

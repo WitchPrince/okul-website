@@ -1,36 +1,54 @@
-# Kampüs Etkinlikleri API — Sprint 7
+# Kampüs Etkinlikleri API — Sprint 8
 
 **Öğrenci:** Işıkhan IŞIK  
 **Öğrenci numarası:** 2416501044
 
-Etkinlikleri JSON olarak döndüren Node.js + Express uygulaması. Frontend bu sprintte değişmedi ve henüz bu API'ye bağlı değil. Veritabanı ve gerçek kimlik doğrulama sonraki sprintlerde eklenecek.
+Node.js + Express API'si, etkinlikleri Mongoose üzerinden MongoDB'de saklar. Frontend ve Vercel ayarları değişmedi; frontend henüz API'ye bağlı değildir. Gerçek kimlik doğrulama yoktur.
 
 ## Kurulum
 
-Node.js 22 veya daha yeni bir sürüm kullanın. Repo kökünden:
+Node.js 22 veya daha yeni bir sürüm ve erişilebilir bir MongoDB veritabanı gerekir. Repo kökünden:
 
 ```bash
 cd backend
 npm install
 cp .env.example .env
+```
+
+`.env` zaten varsa üzerine kopyalamayın. Dosyadaki `MONGODB_URI` değerini kendi geliştirme veritabanınıza göre ayarlayın, ardından:
+
+```bash
+npm run seed
 npm run dev
 ```
 
-`dev` komutu dosyalar değişince sunucuyu yeniden başlatır. İzleme olmadan çalıştırmak için `npm start` kullanılabilir. Komutları `backend/` içinde çalıştırın.
+**Seed, bağlı veritabanındaki bütün etkinlikleri silip altı örnek kayıt ekler. Yalnızca geliştirme/test veritabanında çalıştırın.** Her çalıştırma yeni `_id` değerleri üretir. Seed sunucu başlangıcında otomatik çalışmaz.
 
-İlk kontrol için `http://localhost:3000/health`, liste için `http://localhost:3000/events` adresini açın. Backend bir web sayfası değil, JSON API'dir; `/` adresinde sayfa tanımlı olmadığı için 404 yanıtı döner. Görsel siteyi açmak için frontend'i ayrıca başlatıp Vite'ın gösterdiği adresi kullanın (varsayılan `http://localhost:5173`).
+`dev` dosya değişikliklerini izler; izleme olmadan `npm start` kullanılabilir. Komutları `backend/` içinde çalıştırın. Sunucu ancak MongoDB bağlantısı kurulunca portu dinler.
 
-## Ortam değişkeni
+API adresi `http://localhost:3000` olur. `/health` ve `/events` JSON döndürür; `/` tanımlı olmadığından 404 verir. Görsel site için frontend ayrıca başlatılmalıdır.
 
-`.env.example` dosyasında gerekli ayarın örneği bulunur:
+## Ortam değişkenleri
 
 ```env
 PORT=3000
+MONGODB_URI=mongodb://127.0.0.1:27017/kampus
 ```
 
-`server.js`, dotenv ile `.env` dosyasını yükler ve `process.env.PORT` değerini okur. Değer verilmezse 3000 portu kullanılır. Teslim testleri `http://localhost:3000` adresine istek gönderdiği için test sırasında bu portu kullanın.
+Örnek adres yerel MongoDB içindir; Atlas kullanıyorsanız gerçek bağlantı adresini yalnızca `.env` dosyanıza yazın. `MONGODB_URI` zorunludur; `PORT` verilmezse 3000 kullanılır. Dışarıdan verilen ortam değişkenleri de desteklenir; değerlendirme farklı bir test veritabanı verebilir.
 
-`.env` ve `node_modules/`, `.gitignore` ile dışlanmıştır. Repoya `.env.example` ve `package-lock.json` eklenmelidir; `.env` ve `node_modules/` eklenmemelidir.
+`.env` ve `node_modules/` Git dışında tutulur. Gerçek Atlas adresini veya şifreyi koda, README'ye, `.env.example` dosyasına, Postman koleksiyonuna ya da ekran görüntülerine koymayın. Bağlantı logunda yalnızca host ve veritabanı adı bulunur. Şifre yanlışlıkla commit edildiyse dosyadan silmek yeterli değildir; Atlas'tan şifreyi değiştirin.
+
+## Atlas hazırlığı
+
+1. Atlas'ta ücretsiz bir cluster oluşturun ve hazır olmasını bekleyin.
+2. **Database Access** bölümünden yalnızca bu proje için bir veritabanı kullanıcısı oluşturun. Bu kullanıcı Atlas hesabınızdan ayrıdır.
+3. **Network Access** bölümünde kendi IP adresinize izin verin. IP değiştiğinde bu kaydı güncelleyin.
+4. Cluster altında **Connect → Drivers → Node.js** yolundan bağlantı adresini alın.
+5. Şifre yer tutucusunu kendi şifrenizle değiştirin; özel karakterleri URL biçiminde kodlayın. Adreste veritabanı adını `kampus` olarak, varsa `?` ile başlayan seçeneklerden önce belirtin.
+6. Adresi `backend/.env` içinde `MONGODB_URI` değeri olarak saklayın. Gerçek adresi paylaşmayın.
+
+Bağlantı kurulamazsa cluster durumunu, kullanıcı bilgilerini ve izin verilen IP adresini kontrol edin. Okul ağı erişimi engelliyorsa farklı bir ağ deneyin. Tüm IP'lere erişim açmak yerine mümkün olduğunda kendi IP'nizi kullanın.
 
 ## Dosyalar
 
@@ -39,9 +57,12 @@ backend/
   src/
     app.js
     server.js
+    seed.js
+    config/database.js
+    models/event-model.js
     routes/event-routes.js
     controllers/event-controller.js
-    data/events.js
+    data/seed-events.js
   requests/kampus-api.json
   .env.example
   .gitignore
@@ -50,30 +71,40 @@ backend/
   README.md
 ```
 
-`app.js` middleware ve route'ları bağlar, `server.js` portu dinler. Route dosyası istekleri controller fonksiyonlarına yönlendirir. Etkinlik dizisi `data/events.js` içinde tutulur.
+`app.js` middleware ve route'ları bağlar. `server.js` veritabanı bağlantısını bekleyip sunucuyu başlatır. Controller, `Event` modeliyle sorgu yapar; bellek içi etkinlik dizisi kullanmaz. `seed.js` örnek veriyi yükleyip bağlantıyı kapatır.
 
 ## REST sözleşmesi
 
-| Method | Endpoint | Amaç | Başarılı | Hata | Durum |
-|---|---|---|---|---|---|
-| GET | `/health` | Sunucu durumunu getir | 200 | — | Sprint 7 |
-| GET | `/events` | Etkinlikleri listele | 200 | — | Sprint 7 |
-| GET | `/events/:id` | Tek etkinliği getir | 200 | 404 | Sprint 7 |
-| POST | `/events` | Etkinlik oluştur | 201 | 400 | Sprint 7 |
-| PATCH | `/events/:id` | Etkinliği güncelle | 200 | 400, 404 | Sprint 9, henüz yok |
-| DELETE | `/events/:id` | Etkinliği sil | 204 | 404 | Sprint 9, henüz yok |
+| Method | Endpoint | Amaç | Başarılı | Hata |
+|---|---|---|---|---|
+| GET | `/health` | Sunucu durumu | 200 | — |
+| GET | `/events` | Tarihe göre artan etkinlik listesi | 200 | 400, 500 |
+| GET | `/events/:id` | MongoDB kimliğiyle detay | 200 | 404, 500 |
+| POST | `/events` | Etkinlik oluştur | 201 | 400, 500 |
 
-200 başarılı yanıt, 201 yeni kayıt, 204 içeriksiz yanıt, 400 eksik/yanlış veri, 404 bulunamayan kayıt veya adres anlamına gelir. PATCH ve DELETE bu sprintte uygulanmadı.
+PATCH ve DELETE henüz uygulanmadı.
 
-`GET /health`, `status: "ok"`, ISO biçiminde güncel `time` ve `student: "2416501044"` alanlarını döndürür.
+`GET /health`, `status: "ok"`, ISO biçiminde güncel `time` ve `student: "2416501044"` döndürür.
 
-`GET /events` bir dizi, `GET /events/event-2` tek bir etkinlik nesnesi döndürür. Kategori filtresi isteğe bağlıdır: `/events?category=At%C3%B6lye`. Kategori birebir eşleştirilir; eşleşme yoksa 200 ile boş dizi gelir.
+`GET /events` bir dizi döndürür. `/events?category=At%C3%B6lye` kategoriyi birebir filtreler; eşleşme yoksa 200 ile boş dizi gelir. Detay adresindeki `:id` yerine listeden alınan `_id` yazılır. Eski `event-2` kimliği artık geçerli değildir. Hem biçimi geçersiz kimlikler hem de veritabanında bulunmayan geçerli kimlikler 404 döndürür.
 
-Etkinlik alanları: `id`, `title`, `category`, `date`, `time`, `location`, `description`, `capacity`. Afişler frontend'de kaldığı için API'de `image` alanı yoktur.
+### Model kuralları
+
+| Alan | Kural |
+|---|---|
+| `title` | Zorunlu; trim; 3–100 karakter |
+| `category` | Zorunlu; Seminer, Atölye, Söyleşi veya Yarışma |
+| `date` | Zorunlu metin |
+| `capacity` | Sayı; en az 0; varsayılan 0 |
+| `time` | Metin; varsayılan boş metin |
+| `location` | Metin; trim; varsayılan boş metin |
+| `description` | Metin; trim; en fazla 500 karakter; varsayılan boş metin |
+
+MongoDB `_id` üretir; Mongoose `createdAt` ve `updatedAt` alanlarını otomatik tutar. Yanıtta sürüm alanı `__v` de bulunabilir. API'de `image` alanı yoktur. Tarih için ek takvim/biçim doğrulaması uygulanmaz.
 
 ### Yeni etkinlik
 
-`POST /events` isteğinde `Content-Type: application/json` başlığı ve örneğin şu gövde gönderilir:
+`POST /events` için `Content-Type: application/json` ve örnek gövde:
 
 ```json
 {
@@ -87,11 +118,11 @@ Etkinlik alanları: `id`, `title`, `category`, `date`, `time`, `location`, `desc
 }
 ```
 
-`title`, `category` ve `date` boş olmayan metinler olmalıdır. Sunucu `event-` önekli yeni bir kimlik üretir ve oluşturulan nesneyi 201 ile döndürür. `capacity` sayıya çevrilir; verilmezse veya sayıya çevrilemezse 0 olur. `time`, `location` ve `description` verilmezse boş metin olur. Ayrıntılı tarih, kategori ve kontenjan doğrulaması bu sprintin kapsamında değildir.
+Başarılı istek 201 ile kaydedilen nesneyi döndürür. İstemciden gelen `_id` veya zaman damgaları kullanılmaz. Eksik zorunlu alan, yanlış kategori, kısa başlık ve negatif kapasite gibi schema hataları 400 döndürür.
 
-### Hata yanıtı
+### Hatalar
 
-Hatalar `error.message` biçimindedir. Örneğin `/events/yok` için 404 yanıtı:
+Yanıt yapısı `error.message` biçimindedir. `/events/yok` için:
 
 ```json
 {
@@ -101,29 +132,35 @@ Hatalar `error.message` biçimindedir. Örneğin `/events/yok` için 404 yanıt�
 }
 ```
 
-Zorunlu alan eksikse 400 ve `title, category and date are required` mesajı, bilinmeyen bir adreste 404 ve `Route not found` mesajı döner. Bozuk JSON istekleri de 400 ve aynı hata yapısıyla yanıtlanır.
-
-## Verilerin ömrü
-
-Başlangıçta `event-1`–`event-6` kimlikli altı etkinlik vardır. Başlık, yer ve açıklamalar bu proje için yazılmıştır. POST kayıtları yalnızca bellekteki diziye eklenir; dosyaya kaydedilmez. Başarılı bir POST sonrasında liste yedi kayıt olur. Sunucu yeniden başlatıldığında eklenenler kaybolur ve başlangıçtaki altı kayıt geri gelir.
+Schema doğrulama hataları 400 ve doğrulama mesajıyla; bozuk JSON 400 ile; bilinmeyen adresler 404 ve `Route not found` ile yanıtlanır. Beklenmeyen hatalar 500 ve `Server error` döndürür; bağlantı bilgileri istemciye gönderilmez.
 
 ## Postman ile test
 
-1. Sunucuyu 3000 portunda başlatın.
-2. Postman'de **Import** ile `requests/kampus-api.json` dosyasını açın. Koleksiyon v2.1 biçimindedir.
-3. Sunucuyu yeni başlatmışken altı isteği aşağıdaki sırayla çalıştırın. Her istekte durum kodunu ve yanıtı kontrol eden testler bulunur.
+1. Ayrı bir geliştirme/test veritabanında `npm run seed` komutunu iki kez çalıştırın.
+2. `npm run dev` ile sunucuyu başlatın.
+3. Postman'e `requests/kampus-api.json` dosyasını aktarın.
+4. Altı isteği sırasıyla çalıştırın:
 
 | # | İstek | Beklenen |
 |---|---|---|
-| 1 | GET `/health` | 200, ok + zaman + öğrenci numarası |
-| 2 | GET `/events` | 200, altı kayıt |
-| 3 | GET `/events/event-2` | 200, event-2 |
+| 1 | GET `/health` | 200, durum + zaman + öğrenci numarası |
+| 2 | GET `/events` | 200, altı kayıt ve zaman damgaları |
+| 3 | GET `/events/{{eventId}}` | 200, listeden alınan `_id` |
 | 4 | GET `/events/yok` | 404, error.message |
-| 5 | POST `/events` (tam gövde) | 201, yeni kimlik |
-| 6 | POST `/events` (yalnızca title) | 400, error.message |
+| 5 | POST `/events` | 201, yeni `_id` ve zaman damgaları |
+| 6 | POST `/events` (yalnızca title) | 400, doğrulama mesajı |
 
-Beşinci istek bellekteki listeyi değiştirdiğinden koleksiyonu tekrar çalıştırmadan önce sunucuyu yeniden başlatın. POST sonrasında ayrıca GET `/events` ile yedi kayıt olduğunu kontrol edebilirsiniz.
+Liste isteği `eventId`, oluşturma isteği `createdEventId` koleksiyon değişkenini kaydeder. Beşinci istekten sonra listede yedi kayıt olur. Koleksiyonu tekrar baştan çalıştırmadan önce test verisini seed ile sıfırlayın; yalnızca sunucuyu yeniden başlatmak kayıtları silmez.
 
-## Teslim notu
+Ek olarak yanlış kategori, kısa başlık, negatif kapasite ve biçimi doğru ama mevcut olmayan bir `_id` deneyin. Hatalı istekten sonra `/health` hâlâ 200 dönmelidir.
 
-Frontend ve Vercel ayarları değişmedi; backend bu sprintte canlıya alınmıyor. Teslimde aşama aşama atılmış en az beş commit ve `sprint-07` etiketi bulunmalı. Commit ve etiketler GitHub'a gönderilmeli, repo bağlantısı ders sitesine eklenmelidir.
+### Kalıcılık testi
+
+1. Başarılı POST yanıtındaki `_id` değerini not alın.
+2. Sunucuyu Ctrl+C ile durdurup yeniden başlatın; bu arada seed çalıştırmayın.
+3. `/events` listesinde yedi kayıt olduğunu ve `/events/<kaydedilen_id>` isteğinin 200 döndüğünü doğrulayın.
+4. Atlas'ta **Browse Collections → kampus → events** altında kaydı kontrol edin.
+
+## Teslim
+
+Frontend ve Vercel ayarları korunur; backend bu sprintte canlıya alınmaz. Git geçmişinde gerçek Atlas adresi/şifresi, takip edilen `.env` veya `node_modules/` bulunmamalıdır. Değişiklikleri aşamalı commit'lerle GitHub'a gönderin ve repo bağlantısını ders sitesine ekleyin.
