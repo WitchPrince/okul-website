@@ -1,4 +1,4 @@
-# Kampüs Etkinlikleri — Sprint 8
+# Kampüs Etkinlikleri — Sprint 9
 
 **Öğrenci:** Işıkhan IŞIK  
 **Öğrenci numarası:** 2416501044  
@@ -8,7 +8,7 @@
 
 Kampüs etkinliklerini listeleyen, arayan, detaylarını gösteren ve yönetim panelinden ekleme/güncelleme/silme işlemlerini yapan React + TypeScript tek sayfalı uygulaması.
 
-Sprint 7'de mevcut frontend korunarak yanına Node.js + Express ile ayrı bir `backend/` uygulaması eklendi. Sprint 8'de backend verileri MongoDB ve Mongoose ile kalıcı hale getirildi. Backend, etkinlik listeleme, detay ve oluşturma işlemlerini JSON olarak sunar. Frontend henüz API'ye bağlı değildir; kendi Context verisini kullanmaya devam eder.
+Sprint 7'de mevcut frontend korunarak yanına Node.js + Express ile ayrı bir `backend/` uygulaması eklendi. Sprint 8'de backend verileri MongoDB ve Mongoose ile kalıcı hale getirildi. Sprint 9'da PATCH, DELETE, başlık araması ve yaklaşan etkinlikler eklendi. API tarihleri `GG-AA-YYYY` biçiminde alıp döndürür; MongoDB'de gerçek Date saklanır. Frontend henüz API'ye bağlı değildir; kendi Context verisini kullanmaya devam eder.
 
 ## Kurulum ve çalıştırma
 
@@ -45,7 +45,9 @@ Node.js 22 veya üstü kullanılmalıdır. Komutlardan önce MongoDB hazır olma
 
 Tarayıcıda `http://localhost:3000/health` ve `http://localhost:3000/events` adresleri kontrol edilebilir. Backend'de ana sayfa tanımlı değildir; `http://localhost:3000/` adresinin JSON 404 yanıtı vermesi normaldir.
 
-API sözleşmesi, ortam ayarları ve test adımları: [backend/README.md](backend/README.md). Altı isteklik Postman koleksiyonu: [backend/requests/kampus-api.json](backend/requests/kampus-api.json).
+API sözleşmesi, ortam ayarları ve test adımları: [backend/README.md](backend/README.md). 18 istek ve 45 test içeren Postman koleksiyonu: [backend/requests/kampus-api.json](backend/requests/kampus-api.json). Newman sonucu: [backend/requests/run-results.json](backend/requests/run-results.json).
+
+Sprint 8'den kalan tarih metinleri model değişince otomatik dönüştürülmez. Örnek verileri yenilemek için seed kullanılabilir; mevcut kayıtları korumak istiyorsanız önce yedekleyin ve veri dönüşümünü ayrıca planlayın.
 
 ## Frontend route listesi (10 adres)
 
@@ -97,7 +99,10 @@ backend/
     routes/event-routes.js
     controllers/event-controller.js
     data/seed-events.js
+    utils/date.js
   requests/kampus-api.json
+  requests/run-results.json
+  test/date.test.js
   .env.example
   .gitignore
   package.json
@@ -147,7 +152,7 @@ Frontend verisi kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenile
 12. CSS bozulması olmamalı.
 13. Etkinlik ekleme, giriş, kayıt ve şifremi unuttum formları doğrulanmalı.
 
-## Sprint 8 teslim kontrolü
+## Sprint 9 teslim kontrolü
 
 - Backend ayrı `backend/` klasöründe; route, controller ve veri dosyaları ayrıldı.
 - PORT ve MONGODB_URI ortam değişkenlerinden okunuyor ve `.env.example` mevcut.
@@ -156,9 +161,13 @@ Frontend verisi kalıcı bir sunucuya veya veritabanına yazılmaz; sayfa yenile
 - Seed verisinde özgün başlık, yer ve açıklamaları olan altı etkinlik var; MongoDB `_id` kimliklerini üretir.
 - GET liste ve detay istekleri 200, bulunamayan etkinlik 404 döndürüyor.
 - POST başarılıysa 201, zorunlu alan eksikse 400 döndürüyor.
-- REST sözleşmesi backend README'sinde, altı istek Postman koleksiyonunda bulunuyor.
+- PATCH yalnızca gönderilen düzenlenebilir alanları değiştirir; boş gövde, korunan alan ve hatalı veri 400 döndürür.
+- DELETE başarılıysa gövdesiz 204, tekrar silmede 404 döndürür.
+- `search` başlıkta harf duyarsız arar; kategoriyle birlikte kullanılabilir.
+- `/events/upcoming` bugün ve sonrasını UTC'ye göre filtreler; tarih ve saate göre sıralar.
+- REST sözleşmesi backend README'sinde, 18 istek ve 45 test Postman koleksiyonunda bulunuyor.
 - Seed iki kez çalıştırıldığında da altı kayıt kalmalı; POST kaydı sunucu yeniden başlatıldığında korunmalı.
 - Git geçmişinde gerçek Atlas bağlantı adresi veya şifre bulunmamalı.
-- Teslimden önce değişiklikler aşamalı commit'lerle GitHub'a gönderilmeli; repo bağlantısı ders sitesine eklenmeli.
+- Teslimden önce değişiklikler aşamalı commit'lerle GitHub'a gönderilmeli. Sprint 9'da ders sitesine ayrıca teslim yok; derste backend açıkken resmî Newman koleksiyonuyla kontrol yapılır.
 
 > Not: Frontend React state, backend ise MongoDB kullanır. Henüz frontend–API bağlantısı yoktur; kimlik doğrulama ve e-posta işlemleri demo olarak kalır.

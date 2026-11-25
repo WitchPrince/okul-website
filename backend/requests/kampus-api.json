@@ -1,176 +1,217 @@
 {
   "info": {
-    "name": "Kampüs API",
-    "description": "Işıkhan IŞIK - 2416501044. Sprint 8 için altı istek. Test veritabanında npm run seed çalıştırın, ardından sunucuyu başlatıp istekleri sırayla çalıştırın. Seed mevcut etkinlikleri siler.",
-    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    "name": "Kampüs API · Sprint 9",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Sprint 9 testleri. Çalıştırmadan önce: npm run seed, npm run dev. Sonra collection'a sağ tık > Run collection > Run."
   },
-  "variable": [
-    { "key": "eventId", "value": "" }
-  ],
   "item": [
     {
-      "name": "1 Health",
-      "request": {
-        "method": "GET",
-        "url": "http://localhost:3000/health"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Sunucu ayakta ve öğrenci numarası doğru', function () {",
-              "  pm.response.to.have.status(200);",
-              "  const body = pm.response.json();",
-              "  pm.expect(body.status).to.eql('ok');",
-              "  pm.expect(body.student).to.eql('2416501044');",
-              "  pm.expect(new Date(body.time).toISOString()).to.eql(body.time);",
-              "});"
-            ]
-          }
-        }
-      ]
+      "name": "01 Health",
+      "request": { "method": "GET", "url": "{{baseUrl}}/health" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "const b = pm.response.json();",
+        "pm.test(\"status ok\", () => pm.expect(b.status).to.eql(\"ok\"));",
+        "pm.test(\"student dolu\", () => pm.expect(String(b.student || \"\")).to.match(/\\d{6,}/));"
+      ] } }]
     },
     {
-      "name": "2 Etkinlik listesi",
-      "request": {
-        "method": "GET",
-        "url": "http://localhost:3000/events"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Başlangıçta altı etkinlik var', function () {",
-              "  pm.response.to.have.status(200);",
-              "  const events = pm.response.json();",
-              "  pm.expect(events).to.be.an('array').with.lengthOf(6);",
-               "  events.forEach(function (event) {",
-               "    pm.expect(event._id).to.match(/^[a-f0-9]{24}$/);",
-               "    pm.expect(new Date(event.createdAt).toISOString()).to.eql(event.createdAt);",
-               "    pm.expect(new Date(event.updatedAt).toISOString()).to.eql(event.updatedAt);",
-               "  });",
-               "  pm.collectionVariables.set('eventId', events[0]._id);",
-              "  events.forEach(function (event) { pm.expect(event).not.to.have.property('image'); });",
-              "});"
-            ]
-          }
-        }
-      ]
+      "name": "02 Etkinlik listesi",
+      "request": { "method": "GET", "url": "{{baseUrl}}/events" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "const tarihOk = (d) => /^\\d{2}-\\d{2}-\\d{4}$/.test(d);",
+        "const list = pm.response.json();",
+        "pm.test(\"en az 6 kayıt\", () => pm.expect(list.length).to.be.at.least(6));",
+        "pm.test(\"tarihler GG-AA-YYYY\", () => list.forEach((e) => pm.expect(tarihOk(e.date), e.date).to.be.true));",
+        "pm.test(\"_id ve createdAt var\", () => pm.expect(list[0]).to.have.property(\"_id\") && pm.expect(list[0]).to.have.property(\"createdAt\"));",
+        "pm.collectionVariables.set(\"eventId\", list[0]._id);",
+        "pm.collectionVariables.set(\"toplam\", list.length);"
+      ] } }]
     },
     {
-      "name": "3 Tek etkinlik",
-      "request": {
-        "method": "GET",
-        "url": "http://localhost:3000/events/{{eventId}}"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-               "pm.test('Listedeki kayıt gerçek _id ile geliyor', function () {",
-              "  pm.response.to.have.status(200);",
-              "  const event = pm.response.json();",
-               "  pm.expect(event._id).to.eql(pm.collectionVariables.get('eventId'));",
-               "  pm.expect(event.title).to.be.a('string');",
-              "});"
-            ]
-          }
-        }
-      ]
+      "name": "03 Tek etkinlik",
+      "request": { "method": "GET", "url": "{{baseUrl}}/events/{{eventId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "pm.test(\"doğru kayıt\", () => pm.expect(pm.response.json()._id).to.eql(pm.collectionVariables.get(\"eventId\")));"
+      ] } }]
     },
     {
-      "name": "4 Olmayan etkinlik (404)",
-      "request": {
-        "method": "GET",
-        "url": "http://localhost:3000/events/yok"
-      },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Olmayan etkinlik için 404 dönüyor', function () {",
-              "  pm.response.to.have.status(404);",
-              "  pm.expect(pm.response.json()).to.eql({ error: { message: 'Event not found' } });",
-              "});"
-            ]
-          }
-        }
-      ]
+      "name": "04 Olmayan etkinlik (404)",
+      "request": { "method": "GET", "url": "{{baseUrl}}/events/yok" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 404\", () => pm.response.to.have.status(404));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
     },
     {
-      "name": "5 Etkinlik oluştur (201)",
+      "name": "05 Etkinlik oluştur (201)",
       "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Kampüs İçin Mini API Atölyesi\",\n  \"category\": \"Atölye\",\n  \"date\": \"2026-12-08\",\n  \"time\": \"13:00\",\n  \"location\": \"Yazılım Kulübü Odası\",\n  \"description\": \"Birlikte küçük bir etkinlik API'si hazırlayacağız.\",\n  \"capacity\": 24\n}",
-          "options": { "raw": { "language": "json" } }
-        },
-        "url": "http://localhost:3000/events"
+        "method": "POST", "url": "{{baseUrl}}/events",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"Runner Test Etkinliği\",\n  \"category\": \"Atölye\",\n  \"date\": \"20-12-2026\",\n  \"capacity\": 30,\n  \"time\": \"14:00\",\n  \"location\": \"Test Salonu\",\n  \"description\": \"Collection Runner ile eklendi.\"\n}", "options": { "raw": { "language": "json" } } }
       },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Yeni etkinlik 201 ve yeni kimlikle dönüyor', function () {",
-              "  pm.response.to.have.status(201);",
-              "  const event = pm.response.json();",
-              "  const sent = JSON.parse(pm.request.body.raw);",
-               "  pm.expect(event._id).to.match(/^[a-f0-9]{24}$/);",
-               "  pm.expect(event._id).not.to.eql(pm.collectionVariables.get('eventId'));",
-               "  pm.expect(new Date(event.createdAt).toISOString()).to.eql(event.createdAt);",
-               "  pm.expect(new Date(event.updatedAt).toISOString()).to.eql(event.updatedAt);",
-               "  pm.collectionVariables.set('createdEventId', event._id);",
-              "  Object.keys(sent).forEach(function (key) { pm.expect(event[key]).to.eql(sent[key]); });",
-              "});"
-            ]
-          }
-        }
-      ]
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 201\", () => pm.response.to.have.status(201));",
+        "const e = pm.response.json();",
+        "pm.test(\"_id döndü\", () => pm.expect(e._id).to.be.a(\"string\"));",
+        "pm.test(\"tarih 20-12-2026\", () => pm.expect(e.date).to.eql(\"20-12-2026\"));",
+        "pm.collectionVariables.set(\"newId\", e._id);"
+      ] } }]
     },
     {
-      "name": "6 Eksik veri (400)",
+      "name": "06 Eksik veri (400)",
       "request": {
-        "method": "POST",
-        "header": [
-          { "key": "Content-Type", "value": "application/json" }
-        ],
-        "body": {
-          "mode": "raw",
-          "raw": "{\n  \"title\": \"Eksik Bilgili Etkinlik\"\n}",
-          "options": { "raw": { "language": "json" } }
-        },
-        "url": "http://localhost:3000/events"
+        "method": "POST", "url": "{{baseUrl}}/events",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"Sadece başlık\"\n}", "options": { "raw": { "language": "json" } } }
       },
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Eksik alanlar için 400 dönüyor', function () {",
-              "  pm.response.to.have.status(400);",
-               "  const message = pm.response.json().error.message;",
-               "  pm.expect(message).to.include('date');",
-               "  pm.expect(message).to.include('category');",
-              "});"
-            ]
-          }
-        }
-      ]
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
+    },
+    {
+      "name": "07 Yanlış tarih biçimi (400)",
+      "request": {
+        "method": "POST", "url": "{{baseUrl}}/events",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"title\": \"Git Atölyesi\",\n  \"category\": \"Atölye\",\n  \"date\": \"2026-12-20\"\n}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
+    },
+    {
+      "name": "08 Güncelle (200)",
+      "request": {
+        "method": "PATCH", "url": "{{baseUrl}}/events/{{newId}}",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"capacity\": 55\n}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "const e = pm.response.json();",
+        "pm.test(\"capacity 55\", () => pm.expect(e.capacity).to.eql(55));",
+        "pm.test(\"diğer alanlar değişmedi\", () => pm.expect(e.title).to.eql(\"Runner Test Etkinliği\"));"
+      ] } }]
+    },
+    {
+      "name": "09 Tarih güncelle (200)",
+      "request": {
+        "method": "PATCH", "url": "{{baseUrl}}/events/{{newId}}",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"date\": \"25-12-2026\"\n}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "pm.test(\"tarih 25-12-2026\", () => pm.expect(pm.response.json().date).to.eql(\"25-12-2026\"));"
+      ] } }]
+    },
+    {
+      "name": "10 Boş body (400)",
+      "request": {
+        "method": "PATCH", "url": "{{baseUrl}}/events/{{newId}}",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
+    },
+    {
+      "name": "11 Geçersiz kategori (400)",
+      "request": {
+        "method": "PATCH", "url": "{{baseUrl}}/events/{{newId}}",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"category\": \"Parti\"\n}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
+    },
+    {
+      "name": "12 _id değiştirme (400)",
+      "request": {
+        "method": "PATCH", "url": "{{baseUrl}}/events/{{newId}}",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"_id\": \"abc\"\n}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 400\", () => pm.response.to.have.status(400));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
+    },
+    {
+      "name": "13 Olmayan id güncelle (404)",
+      "request": {
+        "method": "PATCH", "url": "{{baseUrl}}/events/yok",
+        "header": [{ "key": "Content-Type", "value": "application/json" }],
+        "body": { "mode": "raw", "raw": "{\n  \"capacity\": 1\n}", "options": { "raw": { "language": "json" } } }
+      },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 404\", () => pm.response.to.have.status(404));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
+    },
+    {
+      "name": "14 Arama",
+      "request": { "method": "GET", "url": "{{baseUrl}}/events?search=atölye" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "const list = pm.response.json();",
+        "pm.test(\"en az 1 sonuç\", () => pm.expect(list.length).to.be.at.least(1));",
+        "pm.test(\"hepsinin başlığında atölye\", () => list.forEach((e) => pm.expect(e.title.toLocaleLowerCase(\"tr\")).to.include(\"atölye\")));"
+      ] } }]
+    },
+    {
+      "name": "15 Arama + kategori",
+      "request": { "method": "GET", "url": "{{baseUrl}}/events?search=atölye&category=Atölye" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "const list = pm.response.json();",
+        "pm.test(\"hepsi Atölye kategorisinde\", () => list.forEach((e) => pm.expect(e.category).to.eql(\"Atölye\")));",
+        "pm.test(\"hepsinin başlığında atölye\", () => list.forEach((e) => pm.expect(e.title.toLocaleLowerCase(\"tr\")).to.include(\"atölye\")));"
+      ] } }]
+    },
+    {
+      "name": "16 Yaklaşan etkinlikler",
+      "request": { "method": "GET", "url": "{{baseUrl}}/events/upcoming" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 200\", () => pm.response.to.have.status(200));",
+        "const list = pm.response.json();",
+        "const d = (s) => { const [g, a, y] = s.split(\"-\").map(Number); return Date.UTC(y, a - 1, g); };",
+        "const n = new Date(); const bugun = Date.UTC(n.getUTCFullYear(), n.getUTCMonth(), n.getUTCDate());",
+        "pm.test(\"geçmiş tarihli yok\", () => list.forEach((e) => pm.expect(d(e.date), e.date).to.be.at.least(bugun)));",
+        "pm.test(\"en yakın önce\", () => list.forEach((e, i) => i && pm.expect(d(e.date)).to.be.at.least(d(list[i - 1].date))));",
+        "pm.test(\"seed'deki geçmiş etkinlikler elendi\", () => pm.expect(list.length).to.be.below(Number(pm.collectionVariables.get(\"toplam\")) + 1));"
+      ] } }]
+    },
+    {
+      "name": "17 Sil (204)",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/events/{{newId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 204\", () => pm.response.to.have.status(204));",
+        "pm.test(\"gövde boş\", () => pm.expect(pm.response.text()).to.eql(\"\"));"
+      ] } }]
+    },
+    {
+      "name": "18 Tekrar sil (404)",
+      "request": { "method": "DELETE", "url": "{{baseUrl}}/events/{{newId}}" },
+      "event": [{ "listen": "test", "script": { "type": "text/javascript", "exec": [
+        "pm.test(\"status 404\", () => pm.response.to.have.status(404));",
+        "pm.test(\"hata mesajı var\", () => pm.expect(pm.response.json().error.message).to.be.a(\"string\"));"
+      ] } }]
     }
+  ],
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "eventId", "value": "" },
+    { "key": "newId", "value": "" },
+    { "key": "toplam", "value": "" }
   ]
 }

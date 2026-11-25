@@ -2,16 +2,16 @@ export const seedEvents = [
   {
     title: "Açık Kaynak Projelere İlk Katkı",
     category: "Seminer",
-    date: "2026-10-12",
+    date: "12-10-2026",
     time: "14:00",
     location: "Kütüphane Seminer Odası",
     description: "Bir açık kaynak projesinde uygun görev bulma, hata bildirme ve ilk katkıyı gönderme üzerine örnekler konuşacağız.",
     capacity: 120,
   },
   {
-    title: "Sensörlerle Akıllı Saksı Yapımı",
+    title: "Sensörlerle Akıllı Saksı Yapımı Atölyesi",
     category: "Atölye",
-    date: "2026-10-15",
+    date: "15-10-2026",
     time: "10:00",
     location: "Elektronik Laboratuvarı 1",
     description: "Toprak nemini ölçen ve sulama zamanı geldiğinde uyarı veren küçük bir devre kuracağız. Katılanların dizüstü bilgisayar getirmesi yeterli.",
@@ -20,7 +20,7 @@ export const seedEvents = [
   {
     title: "Kampüste Dijital Mahremiyet",
     category: "Söyleşi",
-    date: "2026-10-20",
+    date: "01-12-2026",
     time: "13:30",
     location: "Öğrenci Merkezi Toplantı Salonu",
     description: "Ortak bilgisayarlar, kampüs Wi-Fi ağı ve sosyal medya hesaplarında kişisel bilgilerimizi nasıl koruyabileceğimizi tartışacağız.",
@@ -29,7 +29,7 @@ export const seedEvents = [
   {
     title: "Oyunlarda Yol Bulma Algoritmaları",
     category: "Seminer",
-    date: "2026-10-22",
+    date: "08-12-2026",
     time: "15:00",
     location: "Mühendislik Binası D-203",
     description: "Bir oyun karakterinin engellerin arasından hedefe nasıl ulaştığını kareli bir harita üzerinde inceleyeceğiz. BFS ve A* örneklerini karşılaştıracağız.",
@@ -38,7 +38,7 @@ export const seedEvents = [
   {
     title: "Tarayıcıda Kendi Not Defterini Yaz",
     category: "Atölye",
-    date: "2026-10-27",
+    date: "15-12-2026",
     time: "11:00",
     location: "Yazılım Geliştirme Laboratuvarı 3",
     description: "JavaScript ile not ekleyip silebildiğimiz küçük bir sayfa hazırlayacağız. Notları localStorage ile saklayıp sayfa yenilendiğinde geri getireceğiz.",
@@ -47,7 +47,7 @@ export const seedEvents = [
   {
     title: "İlk Stajın Ardından: Neler Öğrendik?",
     category: "Söyleşi",
-    date: "2026-10-30",
+    date: "17-12-2026",
     time: "16:00",
     location: "Kariyer Merkezi Etkinlik Odası",
     description: "Yaz stajını tamamlayan öğrenciler başvuru sürecini, ekip içindeki ilk görevlerini ve zorlandıkları konuları anlatacak. Son bölümde soruları birlikte yanıtlayacağız.",
